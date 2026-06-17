@@ -1,0 +1,1368 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tienda de Zapatos - Pago contra reembolso</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+    <style>
+        :root {
+            --primary: #667eea;
+            --secondary: #764ba2;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 50%, rgba(255,255,255,0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(255,255,255,0.1) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .app-container {
+            position: relative;
+            z-index: 1;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .navbar-custom {
+            background: rgba(255, 255, 255, 0.95) !important;
+            box-shadow: 0 2px 20px rgba(0,0,0,0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .navbar-brand-custom {
+            color: var(--primary) !important;
+            font-weight: 700;
+            font-size: 1.2rem;
+            text-decoration: none;
+        }
+
+        .btn-custom {
+            border-radius: 25px;
+            padding: 8px 20px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            font-size: 0.85rem;
+        }
+
+        .btn-primary-custom {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            border: none;
+            color: white;
+        }
+
+        .btn-primary-custom:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+            color: white;
+        }
+
+        .btn-outline-custom {
+            border: 2px solid var(--primary);
+            color: var(--primary);
+            background: transparent;
+        }
+
+        .btn-outline-custom:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-lang {
+            border: 2px solid var(--primary);
+            color: var(--primary);
+            background: transparent;
+            padding: 4px 10px;
+            font-size: 0.75rem;
+            border-radius: 20px;
+        }
+
+        .btn-lang:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        .card-custom {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            background: white;
+            overflow: hidden;
+        }
+
+        .card-custom:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.2);
+        }
+
+        .card-img-wrapper {
+            overflow: hidden;
+            position: relative;
+        }
+
+        .card-img-wrapper img {
+            transition: transform 0.3s ease;
+        }
+
+        .card-custom:hover .card-img-wrapper img {
+            transform: scale(1.05);
+        }
+
+        .banner-custom {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            font-size: 0.9rem;
+        }
+
+        .price-tag {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-weight: 600;
+            display: inline-block;
+            font-size: 0.9rem;
+        }
+
+        .section-title {
+            color: white;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+            font-weight: 700;
+            font-size: 1.5rem;
+        }
+
+        .text-gradient {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .page {
+            display: none;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        .cart-count {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: #dc3545;
+            color: white;
+            border-radius: 50%;
+            width: 18px;
+            height: 18px;
+            font-size: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        footer {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            margin-top: auto;
+        }
+
+        .admin-dot {
+            color: #ccc;
+            text-decoration: none;
+            font-size: 8px;
+            cursor: pointer;
+            opacity: 0.5;
+        }
+
+        .alert-floating {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+            min-width: 250px;
+            font-size: 0.9rem;
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 9998;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .image-preview {
+            width: 150px;
+            height: 150px;
+            object-fit: cover;
+            border-radius: 10px;
+            border: 2px dashed #ccc;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #f8f9fa;
+        }
+
+        .image-preview img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 10px;
+        }
+
+        .login-container {
+            min-height: 80vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .login-card {
+            max-width: 400px;
+            width: 100%;
+        }
+
+        @media (max-width: 768px) {
+            .btn-custom {
+                padding: 6px 12px;
+                font-size: 0.75rem;
+            }
+            .navbar-brand-custom {
+                font-size: 1rem;
+            }
+            .card-custom {
+                margin-bottom: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Navigation -->
+        <nav class="navbar navbar-expand-lg navbar-custom">
+            <div class="container">
+                <a href="#" class="navbar-brand-custom" onclick="navigateTo('home')">
+                    <i class="bi bi-truck"></i> <span data-key="store_name">Tienda de Zapatos</span>
+                </a>
+                <div class="ms-auto d-flex gap-1">
+                    <button class="btn btn-outline-custom btn-sm" onclick="navigateTo('tracking')">
+                        <i class="bi bi-search"></i> <span data-key="tracking">Seguimiento</span>
+                    </button>
+                    <button class="btn btn-outline-custom btn-sm position-relative" onclick="navigateTo('cart')">
+                        <i class="bi bi-cart"></i> <span data-key="cart">Carrito</span>
+                        <span class="cart-count" id="cartCount">0</span>
+                    </button>
+                    <button class="btn btn-lang btn-sm ms-2" onclick="toggleLanguage()">
+                        <i class="bi bi-globe"></i> <span id="langBtnText">EN</span>
+                    </button>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Banner -->
+        <div class="banner-custom text-center py-2">
+            <i class="bi bi-truck"></i> <strong data-key="banner_title">Pago contra reembolso</strong> - <span data-key="banner_text">¡Paga al recibir!</span> 🚀
+        </div>
+
+        <!-- Main Content -->
+        <div class="container mt-3 mb-5 px-2">
+            <!-- Home Page -->
+            <div class="page active" id="page-home">
+                <h1 class="section-title mb-3"><i class="bi bi-shop"></i> <span data-key="our_products">Nuestros Productos</span></h1>
+                <div class="row" id="productsContainer"></div>
+                <div class="glass-card p-3 mt-3">
+                    <h5 class="text-gradient"><i class="bi bi-info-circle"></i> <span data-key="how_it_works">¿Cómo funciona?</span></h5>
+                    <div class="row mt-2">
+                        <div class="col-6 col-md-3 text-center mb-2">
+                            <i class="bi bi-cart-plus text-success" style="font-size: 2rem;"></i>
+                            <h6><span data-key="step1">1. Ordena</span></h6>
+                        </div>
+                        <div class="col-6 col-md-3 text-center mb-2">
+                            <i class="bi bi-pencil-square text-primary" style="font-size: 2rem;"></i>
+                            <h6><span data-key="step2">2. Completa</span></h6>
+                        </div>
+                        <div class="col-6 col-md-3 text-center mb-2">
+                            <i class="bi bi-truck text-warning" style="font-size: 2rem;"></i>
+                            <h6><span data-key="step3">3. Recibe</span></h6>
+                        </div>
+                        <div class="col-6 col-md-3 text-center mb-2">
+                            <i class="bi bi-cash text-danger" style="font-size: 2rem;"></i>
+                            <h6><span data-key="step4">4. Paga</span></h6>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Other pages -->
+            <div class="page" id="page-product-detail"></div>
+            
+            <div class="page" id="page-cart">
+                <div class="glass-card p-3">
+                    <h4 class="text-gradient"><i class="bi bi-cart"></i> <span data-key="your_cart">Tu carrito</span></h4>
+                    <div id="cartContent"></div>
+                </div>
+            </div>
+
+            <div class="page" id="page-checkout">
+                <h4 class="section-title mb-3"><i class="bi bi-clipboard-check"></i> <span data-key="checkout_title">Finalizar pedido</span></h4>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <div class="glass-card p-3 h-100">
+                            <h5 class="text-gradient"><span data-key="summary">Resumen</span></h5>
+                            <div id="checkoutSummary"></div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="glass-card p-3 h-100">
+                            <h5 class="text-gradient"><i class="bi bi-geo-alt"></i> <span data-key="delivery_address">Dirección de envío</span></h5>
+                            <form id="checkoutForm" onsubmit="placeOrder(event)">
+                                <div class="row">
+                                    <div class="col-6 mb-2">
+                                        <label class="form-label small"><span data-key="first_name">Nombre</span> *</label>
+                                        <input type="text" class="form-control form-control-sm" id="firstName" required>
+                                    </div>
+                                    <div class="col-6 mb-2">
+                                        <label class="form-label small"><span data-key="last_name">Apellido</span> *</label>
+                                        <input type="text" class="form-control form-control-sm" id="lastName" required>
+                                    </div>
+                                </div>
+                                <div class="mb-2">
+                                    <label class="form-label small">Email *</label>
+                                    <input type="email" class="form-control form-control-sm" id="email" required>
+                                </div>
+                                <div class="mb-2">
+                                    <label class="form-label small"><span data-key="phone">Teléfono</span> *</label>
+                                    <input type="tel" class="form-control form-control-sm" id="phone" required>
+                                </div>
+                                <div class="mb-2">
+                                    <label class="form-label small"><span data-key="address">Dirección completa</span> *</label>
+                                    <input type="text" class="form-control form-control-sm" id="address" required>
+                                </div>
+                                <div class="row">
+                                    <div class="col-6 mb-2">
+                                        <label class="form-label small"><span data-key="postal_code">Código postal</span> *</label>
+                                        <input type="text" class="form-control form-control-sm" id="postalCode" required>
+                                    </div>
+                                    <div class="col-6 mb-2">
+                                        <label class="form-label small"><span data-key="city">Ciudad</span> *</label>
+                                        <input type="text" class="form-control form-control-sm" id="city" required>
+                                    </div>
+                                </div>
+                                <button type="submit" class="btn btn-primary-custom w-100 btn-sm">
+                                    <i class="bi bi-check-circle"></i> <span data-key="confirm_order">Confirmar pedido</span>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="page" id="page-confirmation">
+                <div class="glass-card p-4 text-center">
+                    <i class="bi bi-check-circle text-success" style="font-size: 4rem;"></i>
+                    <h3 class="text-gradient mt-2"><span data-key="order_confirmed">¡Pedido confirmado!</span></h3>
+                    <div id="confirmationContent"></div>
+                    <button class="btn btn-primary-custom btn-sm mt-2" onclick="navigateTo('home')">
+                        <i class="bi bi-shop"></i> <span data-key="back">Volver</span>
+                    </button>
+                    <button class="btn btn-outline-custom btn-sm mt-2 ms-1" onclick="navigateTo('tracking')">
+                        <i class="bi bi-search"></i> <span data-key="tracking">Seguimiento</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="page" id="page-tracking">
+                <div class="glass-card p-3" style="max-width: 500px; margin: 0 auto;">
+                    <h4 class="text-gradient text-center"><i class="bi bi-search"></i> <span data-key="tracking_title">Seguimiento de pedido</span></h4>
+                    <div id="trackingForm">
+                        <div class="mb-2">
+                            <label class="form-label small"><span data-key="order_number">Número de pedido</span></label>
+                            <input type="number" class="form-control form-control-sm" id="trackOrderId" required>
+                        </div>
+                        <div class="mb-2">
+                            <label class="form-label small">Email</label>
+                            <input type="email" class="form-control form-control-sm" id="trackEmail" required>
+                        </div>
+                        <button class="btn btn-primary-custom w-100 btn-sm" onclick="trackOrder()">
+                            <i class="bi bi-search"></i> <span data-key="view_status">Ver estado</span>
+                        </button>
+                    </div>
+                    <div id="trackingResult" style="display:none;"></div>
+                </div>
+            </div>
+
+            <!-- Admin Login Page -->
+            <div class="page" id="page-admin-login">
+                <div class="login-container">
+                    <div class="glass-card p-4 login-card">
+                        <h4 class="text-gradient text-center mb-4"><i class="bi bi-shield-lock"></i> <span data-key="admin_login">Acceso Administrador</span></h4>
+                        <form id="adminLoginForm" onsubmit="authenticateAdmin(event)">
+                            <div class="mb-3">
+                                <label class="form-label"><span data-key="username">Usuario</span></label>
+                                <input type="text" class="form-control" id="adminUsername" required autocomplete="off">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label"><span data-key="password">Contraseña</span></label>
+                                <input type="password" class="form-control" id="adminPassword" required>
+                            </div>
+                            <button type="submit" class="btn btn-primary-custom w-100">
+                                <i class="bi bi-box-arrow-in-right"></i> <span data-key="login">Iniciar sesión</span>
+                            </button>
+                        </form>
+                        <hr class="my-3">
+                        <div class="text-center">
+                            <small class="text-muted"><span data-key="demo_creds">Credenciales demo: admin / admin123</span></small>
+                        </div>
+                        <div class="text-center mt-2">
+                            <button class="btn btn-outline-custom btn-sm" onclick="navigateTo('home')">
+                                <i class="bi bi-arrow-left"></i> <span data-key="back_to_store">Volver a la tienda</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Admin Dashboard Page -->
+            <div class="page" id="page-admin-dashboard">
+                <div class="glass-card p-3">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h4 class="text-gradient"><i class="bi bi-speedometer2"></i> <span data-key="administration">Administración</span></h4>
+                        <button class="btn btn-outline-danger btn-sm" onclick="logoutAdmin()">
+                            <i class="bi bi-box-arrow-right"></i> <span data-key="logout">Cerrar sesión</span>
+                        </button>
+                    </div>
+                    <div id="adminContent"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer class="text-center text-muted py-2">
+            <div class="container">
+                <small>© 2025 <span data-key="store_name">Tienda de Zapatos</span> - <span data-key="delivery_time">Entrega 1-3 días</span></small><br>
+                <small>Made with ❤️</small><br>
+                <small><a href="#" onclick="event.preventDefault(); navigateTo('admin-login');" style="color:#ccc; text-decoration:none; font-size:10px;">● Admin ●</a></small>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Modal for adding product -->
+    <div id="addProductModal" class="modal-overlay" style="display:none;">
+        <div class="glass-card p-4" style="width:90%; max-width:500px;">
+            <h5 class="text-gradient mb-3"><i class="bi bi-plus-circle"></i> <span data-key="add_product">Agregar producto</span></h5>
+            <form id="addProductForm" onsubmit="submitProductForm(event)">
+                <div class="mb-3">
+                    <label class="form-label"><span data-key="product_name">Nombre del producto</span> *</label>
+                    <input type="text" class="form-control" id="productName" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label"><span data-key="description">Descripción</span></label>
+                    <textarea class="form-control" id="productDescription" rows="2"></textarea>
+                </div>
+                <div class="row">
+                    <div class="col-6 mb-3">
+                        <label class="form-label"><span data-key="price">Precio</span> (€) *</label>
+                        <input type="number" class="form-control" id="productPrice" step="0.01" min="0" required>
+                    </div>
+                    <div class="col-6 mb-3">
+                        <label class="form-label"><span data-key="stock">Stock</span> *</label>
+                        <input type="number" class="form-control" id="productStock" min="0" required>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label"><span data-key="product_photo">Foto del producto</span></label>
+                    <div class="d-flex gap-3 align-items-center">
+                        <div class="image-preview" onclick="document.getElementById('productImageInput').click()" id="imagePreviewContainer">
+                            <i class="bi bi-camera" style="font-size: 2rem; color: #ccc;" id="placeholderIcon"></i>
+                            <img id="imagePreview" src="" alt="Preview" style="display:none;">
+                        </div>
+                        <div>
+                            <button type="button" class="btn btn-outline-custom btn-sm" onclick="document.getElementById('productImageInput').click()">
+                                <i class="bi bi-camera"></i> <span data-key="take_photo">Tomar foto</span>
+                            </button>
+                            <button type="button" class="btn btn-outline-custom btn-sm mt-1" onclick="document.getElementById('productImageFile').click()">
+                                <i class="bi bi-upload"></i> <span data-key="upload_image">Subir imagen</span>
+                            </button>
+                            <input type="file" id="productImageFile" accept="image/*" style="display:none;" onchange="handleImageFile(this)">
+                            <input type="file" id="productImageInput" accept="image/*" capture="environment" style="display:none;" onchange="handleImageCapture(this)">
+                        </div>
+                    </div>
+                    <small class="text-muted"><span data-key="image_hint">Haz clic en la vista previa para tomar una foto o sube una imagen</span></small>
+                </div>
+                <div class="d-flex gap-2 justify-content-end">
+                    <button type="button" class="btn btn-outline-custom btn-sm" onclick="closeAddProductModal()"><span data-key="cancel">Cancelar</span></button>
+                    <button type="submit" class="btn btn-primary-custom btn-sm">
+                        <i class="bi bi-check-circle"></i> <span data-key="add">Agregar</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="notificationArea" style="position: fixed; top: 20px; right: 20px; z-index: 9999;"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // ============================================================
+        // ADMIN AUTHENTICATION
+        // ============================================================
+        
+        // Check URL hash for admin access
+        function checkAdminRoute() {
+            const hash = window.location.hash;
+            if (hash === '#admin' || hash === '#/admin') {
+                navigateTo('admin-login');
+                return true;
+            }
+            return false;
+        }
+        
+        // Listen to hash changes
+        window.addEventListener('hashchange', function() {
+            if (window.location.hash === '#admin' || window.location.hash === '#/admin') {
+                navigateTo('admin-login');
+            }
+        });
+        
+        function authenticateAdmin(event) {
+            event.preventDefault();
+            const username = document.getElementById('adminUsername').value;
+            const password = document.getElementById('adminPassword').value;
+            
+            // Demo credentials: admin / admin123
+            if (username === 'admin' && password === 'admin123') {
+                sessionStorage.setItem('adminLoggedIn', 'true');
+                showNotification('Acceso concedido', 'success');
+                navigateTo('admin-dashboard');
+            } else {
+                showNotification('Usuario o contraseña incorrectos', 'danger');
+            }
+        }
+        
+        function logoutAdmin() {
+            sessionStorage.removeItem('adminLoggedIn');
+            showNotification('Sesión cerrada', 'info');
+            navigateTo('home');
+            window.location.hash = '';
+        }
+        
+        function isAdminLoggedIn() {
+            return sessionStorage.getItem('adminLoggedIn') === 'true';
+        }
+        
+        // ============================================================
+        // LANGUAGE MANAGEMENT
+        // ============================================================
+        
+        let currentLang = 'es';
+        
+        const translations = {
+            es: {
+                store_name: "Tienda de Zapatos",
+                tracking: "Seguimiento",
+                cart: "Carrito",
+                banner_title: "Pago contra reembolso",
+                banner_text: "¡Paga al recibir!",
+                our_products: "Nuestros Productos",
+                how_it_works: "¿Cómo funciona?",
+                step1: "1. Ordena",
+                step2: "2. Completa",
+                step3: "3. Recibe",
+                step4: "4. Paga",
+                your_cart: "Tu carrito",
+                checkout_title: "Finalizar pedido",
+                summary: "Resumen",
+                delivery_address: "Dirección de envío",
+                first_name: "Nombre",
+                last_name: "Apellido",
+                phone: "Teléfono",
+                address: "Dirección completa",
+                postal_code: "Código postal",
+                city: "Ciudad",
+                confirm_order: "Confirmar pedido",
+                order_confirmed: "¡Pedido confirmado!",
+                back: "Volver",
+                tracking_title: "Seguimiento de pedido",
+                order_number: "Número de pedido",
+                view_status: "Ver estado",
+                administration: "Administración",
+                add_product: "Agregar producto",
+                product_name: "Nombre del producto",
+                description: "Descripción",
+                price: "Precio",
+                stock: "Stock",
+                product_photo: "Foto del producto",
+                take_photo: "Tomar foto",
+                upload_image: "Subir imagen",
+                image_hint: "Haz clic en la vista previa para tomar una foto o sube una imagen",
+                cancel: "Cancelar",
+                add: "Agregar",
+                view: "Ver",
+                order_now: "Ordenar",
+                empty_cart: "Carrito vacío",
+                view_products: "Ver productos",
+                continue: "Continuar",
+                finalize: "Finalizar",
+                payment_on_delivery: "Pago contra reembolso",
+                stock_insufficient: "Stock insuficiente",
+                order_not_found: "Pedido no encontrado",
+                cancelled: "Cancelado",
+                pending: "Pendiente",
+                processing: "En preparación",
+                shipped: "Enviado",
+                delivered: "Entregado",
+                delivery_time_info: "Entrega 1-3 días",
+                customer: "Cliente",
+                total: "Total",
+                return: "Volver",
+                order_cancelled: "Pedido cancelado",
+                cancel_order: "Cancelar",
+                already_cancelled: "Ya cancelado",
+                cannot_cancel: "Imposible cancelar, pedido enviado",
+                product_added: "Producto añadido al carrito",
+                product_added_success: "Producto añadido con éxito",
+                updated: "Actualizado",
+                deleted: "Eliminado",
+                status_updated: "Estado actualizado",
+                quantity: "Cantidad",
+                out_of_stock: "Agotado",
+                date: "Fecha",
+                orders: "Pedidos",
+                status: "Estado",
+                admin_login: "Acceso Administrador",
+                username: "Usuario",
+                password: "Contraseña",
+                login: "Iniciar sesión",
+                demo_creds: "Credenciales demo: admin / admin123",
+                back_to_store: "Volver a la tienda",
+                logout: "Cerrar sesión"
+            },
+            en: {
+                store_name: "Shoes Store",
+                tracking: "Tracking",
+                cart: "Cart",
+                banner_title: "Cash on delivery",
+                banner_text: "Pay upon receipt!",
+                our_products: "Our Products",
+                how_it_works: "How it works?",
+                step1: "1. Order",
+                step2: "2. Fill in",
+                step3: "3. Receive",
+                step4: "4. Pay",
+                your_cart: "Your cart",
+                checkout_title: "Checkout",
+                summary: "Summary",
+                delivery_address: "Delivery address",
+                first_name: "First name",
+                last_name: "Last name",
+                phone: "Phone",
+                address: "Full address",
+                postal_code: "Postal code",
+                city: "City",
+                confirm_order: "Confirm order",
+                order_confirmed: "Order confirmed!",
+                back: "Back",
+                tracking_title: "Order tracking",
+                order_number: "Order number",
+                view_status: "View status",
+                administration: "Administration",
+                add_product: "Add product",
+                product_name: "Product name",
+                description: "Description",
+                price: "Price",
+                stock: "Stock",
+                product_photo: "Product photo",
+                take_photo: "Take photo",
+                upload_image: "Upload image",
+                image_hint: "Click on preview to take a photo or upload an image",
+                cancel: "Cancel",
+                add: "Add",
+                view: "View",
+                order_now: "Order now",
+                empty_cart: "Empty cart",
+                view_products: "View products",
+                continue: "Continue",
+                finalize: "Finalize",
+                payment_on_delivery: "Cash on delivery",
+                stock_insufficient: "Insufficient stock",
+                order_not_found: "Order not found",
+                cancelled: "Cancelled",
+                pending: "Pending",
+                processing: "Processing",
+                shipped: "Shipped",
+                delivered: "Delivered",
+                delivery_time_info: "Delivery 1-3 days",
+                customer: "Customer",
+                total: "Total",
+                return: "Return",
+                order_cancelled: "Order cancelled",
+                cancel_order: "Cancel",
+                already_cancelled: "Already cancelled",
+                cannot_cancel: "Cannot cancel, order shipped",
+                product_added: "Product added to cart",
+                product_added_success: "Product added successfully",
+                updated: "Updated",
+                deleted: "Deleted",
+                status_updated: "Status updated",
+                quantity: "Qty",
+                out_of_stock: "Out of stock",
+                date: "Date",
+                orders: "Orders",
+                status: "Status",
+                admin_login: "Admin Access",
+                username: "Username",
+                password: "Password",
+                login: "Login",
+                demo_creds: "Demo credentials: admin / admin123",
+                back_to_store: "Back to store",
+                logout: "Logout"
+            }
+        };
+        
+        function t(key) {
+            return translations[currentLang][key] || key;
+        }
+        
+        function updatePageLanguage() {
+            document.querySelectorAll('[data-key]').forEach(el => {
+                const key = el.getAttribute('data-key');
+                if (key) {
+                    el.textContent = t(key);
+                }
+            });
+            document.getElementById('langBtnText').textContent = currentLang === 'es' ? 'EN' : 'ES';
+            const activePage = document.querySelector('.page.active');
+            if (activePage) {
+                const pageId = activePage.id;
+                if (pageId === 'page-home') renderProducts();
+                else if (pageId === 'page-cart') renderCart();
+                else if (pageId === 'page-checkout') renderCheckout();
+                else if (pageId === 'page-admin-dashboard' && isAdminLoggedIn()) renderAdmin();
+            }
+        }
+        
+        function toggleLanguage() {
+            currentLang = currentLang === 'es' ? 'en' : 'es';
+            updatePageLanguage();
+            showNotification(currentLang === 'es' ? 'Idioma cambiado a Español' : 'Language changed to English', 'success');
+        }
+        
+        // ============================================================
+        // DATABASE (localStorage)
+        // ============================================================
+        
+        const DB_KEY = 'chaussures_store_db';
+        let tempProductImage = null;
+        
+        function getDB() {
+            let db = localStorage.getItem(DB_KEY);
+            if (!db) {
+                db = initializeDB();
+                saveDB(db);
+            } else {
+                db = JSON.parse(db);
+            }
+            return db;
+        }
+        
+        function saveDB(db) {
+            localStorage.setItem(DB_KEY, JSON.stringify(db));
+        }
+        
+        function initializeDB() {
+            return {
+                products: [
+                    { id: 1, name: 'Nike Air Max', description: 'Cómodos y modernos. Envío gratis.', price: 79.00, stock: 25, image: 'https://picsum.photos/id/21/400/300' },
+                    { id: 2, name: 'Adidas Ultraboost', description: 'Amortiguación excepcional para correr.', price: 99.00, stock: 15, image: 'https://picsum.photos/id/30/400/300' },
+                    { id: 3, name: 'Puma RS-X', description: 'Estilo retro y confort moderno.', price: 65.00, stock: 30, image: 'https://picsum.photos/id/42/400/300' },
+                    { id: 4, name: 'Birkenstock', description: 'Perfectas para el verano.', price: 49.00, stock: 40, image: 'https://picsum.photos/id/60/400/300' },
+                    { id: 5, name: 'Timberland', description: 'Robustas e impermeables.', price: 129.00, stock: 20, image: 'https://picsum.photos/id/64/400/300' },
+                    { id: 6, name: 'Tacones', description: 'Para todas las ocasiones.', price: 89.00, stock: 18, image: 'https://picsum.photos/id/100/400/300' },
+                    { id: 7, name: 'Mocasines cuero', description: 'Comodidad y elegancia.', price: 69.00, stock: 22, image: 'https://picsum.photos/id/180/400/300' },
+                    { id: 8, name: 'Zapatillas running ligeras', description: 'Rendimiento y ligereza.', price: 109.00, stock: 12, image: 'https://picsum.photos/id/96/400/300' }
+                ],
+                orders: [],
+                nextProductId: 9,
+                nextOrderId: 1
+            };
+        }
+        
+        // ============================================================
+        // IMAGE MANAGEMENT
+        // ============================================================
+        
+        function handleImageCapture(input) {
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    tempProductImage = e.target.result;
+                    document.getElementById('imagePreview').src = tempProductImage;
+                    document.getElementById('imagePreview').style.display = 'block';
+                    document.getElementById('placeholderIcon').style.display = 'none';
+                };
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+        
+        function handleImageFile(input) {
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    tempProductImage = e.target.result;
+                    document.getElementById('imagePreview').src = tempProductImage;
+                    document.getElementById('imagePreview').style.display = 'block';
+                    document.getElementById('placeholderIcon').style.display = 'none';
+                };
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+        
+        // ============================================================
+        // CART
+        // ============================================================
+        
+        function getCart() {
+            let cart = localStorage.getItem('cart');
+            return cart ? JSON.parse(cart) : [];
+        }
+        
+        function saveCart(cart) {
+            localStorage.setItem('cart', JSON.stringify(cart));
+            updateCartCount();
+        }
+        
+        function addToCart(productId, quantity = 1) {
+            let cart = getCart();
+            let existing = cart.find(item => item.productId === productId);
+            if (existing) {
+                existing.quantity += quantity;
+            } else {
+                cart.push({ productId: productId, quantity: quantity });
+            }
+            saveCart(cart);
+            showNotification(t('product_added'), 'success');
+        }
+        
+        function removeFromCart(productId) {
+            let cart = getCart().filter(item => item.productId !== productId);
+            saveCart(cart);
+            navigateTo('cart');
+        }
+        
+        function clearCart() {
+            saveCart([]);
+        }
+        
+        function updateCartCount() {
+            let cart = getCart();
+            let count = cart.reduce((sum, item) => sum + item.quantity, 0);
+            document.getElementById('cartCount').textContent = count;
+        }
+        
+        function getCartTotal() {
+            let db = getDB();
+            let cart = getCart();
+            return cart.reduce((total, item) => {
+                let product = db.products.find(p => p.id === item.productId);
+                return total + (product ? product.price * item.quantity : 0);
+            }, 0);
+        }
+        
+        // ============================================================
+        // NAVIGATION
+        // ============================================================
+        
+        function navigateTo(page, data = null) {
+            // Check admin authentication for admin pages
+            if (page === 'admin-dashboard' && !isAdminLoggedIn()) {
+                navigateTo('admin-login');
+                return;
+            }
+            
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            let pageElement = document.getElementById('page-' + page);
+            if (pageElement) pageElement.classList.add('active');
+            
+            switch(page) {
+                case 'home': renderProducts(); break;
+                case 'product-detail': if (data) renderProductDetail(data); break;
+                case 'cart': renderCart(); break;
+                case 'checkout': renderCheckout(); break;
+                case 'confirmation': if (data) renderConfirmation(data); break;
+                case 'tracking': resetTracking(); break;
+                case 'admin-dashboard': if (isAdminLoggedIn()) renderAdmin(); break;
+                case 'admin-login': 
+                    document.getElementById('adminUsername').value = '';
+                    document.getElementById('adminPassword').value = '';
+                    break;
+            }
+            window.scrollTo(0, 0);
+        }
+        
+        // ============================================================
+        // RENDER PRODUCTS
+        // ============================================================
+        
+        function renderProducts() {
+            let db = getDB();
+            let container = document.getElementById('productsContainer');
+            let html = '';
+            
+            db.products.forEach(product => {
+                html += `
+                    <div class="col-6 col-md-3 mb-3">
+                        <div class="card-custom h-100">
+                            <div class="card-img-wrapper" style="height:150px;">
+                                <img src="${product.image}" alt="${product.name}" style="width:100%; height:100%; object-fit:cover;">
+                            </div>
+                            <div class="card-body d-flex flex-column p-2">
+                                <h6 class="card-title fw-bold small">${product.name}</h6>
+                                <div class="mt-auto">
+                                    <span class="price-tag small">${product.price.toFixed(2)} €</span>
+                                    ${product.stock > 0 
+                                        ? '<span class="badge bg-success small"><i class="bi bi-check-circle"></i></span>'
+                                        : '<span class="badge bg-danger small"><i class="bi bi-x-circle"></i></span>'}
+                                    <button class="btn btn-outline-custom w-100 mt-1 btn-sm" onclick="navigateTo('product-detail', ${product.id})">
+                                        <i class="bi bi-eye"></i> ${t('view')}
+                                    </button>
+                                    ${product.stock > 0 ? `
+                                        <button class="btn btn-primary-custom w-100 mt-1 btn-sm" onclick="addToCart(${product.id}); event.stopPropagation();">
+                                            <i class="bi bi-cart-plus"></i> ${t('order_now')}
+                                        </button>
+                                    ` : ''}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            container.innerHTML = html;
+        }
+        
+        function renderProductDetail(productId) {
+            let db = getDB();
+            let product = db.products.find(p => p.id === productId);
+            if (!product) return;
+            
+            let container = document.getElementById('page-product-detail');
+            container.innerHTML = `
+                <div class="glass-card p-3">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <img src="${product.image}" alt="${product.name}" style="width:100%; border-radius:15px; max-height:300px; object-fit:cover;">
+                        </div>
+                        <div class="col-md-6">
+                            <h4 class="fw-bold">${product.name}</h4>
+                            <div class="price-tag mb-2">${product.price.toFixed(2)} €</div>
+                            <p class="small">${product.description}</p>
+                            <p class="small"><i class="bi bi-box-seam"></i> <strong>${t('stock')} :</strong> ${product.stock}</p>
+                            ${product.stock > 0 ? `
+                                <div class="input-group input-group-sm mb-2" style="max-width: 200px;">
+                                    <span class="input-group-text">${t('quantity')}</span>
+                                    <input type="number" id="detailQuantity" class="form-control" value="1" min="1" max="${product.stock}">
+                                </div>
+                                <button class="btn btn-primary-custom btn-sm" onclick="let q=parseInt(document.getElementById('detailQuantity').value); addToCart(${product.id}, q); navigateTo('cart');">
+                                    <i class="bi bi-cart-plus"></i> ${t('order_now')}
+                                </button>
+                            ` : `
+                                <button class="btn btn-secondary btn-sm" disabled>${t('out_of_stock')}</button>
+                            `}
+                            <button class="btn btn-outline-custom btn-sm mt-2" onclick="navigateTo('home')">
+                                <i class="bi bi-arrow-left"></i> ${t('return')}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        // ============================================================
+        // CART RENDERING
+        // ============================================================
+        
+        function renderCart() {
+            let db = getDB();
+            let cart = getCart();
+            let container = document.getElementById('cartContent');
+            
+            if (cart.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-4">
+                        <i class="bi bi-cart-x" style="font-size: 4rem; color: var(--primary);"></i>
+                        <h5 class="text-gradient">${t('empty_cart')}</h5>
+                        <button class="btn btn-primary-custom btn-sm" onclick="navigateTo('home')">${t('view_products')}</button>
+                    </div>
+                `;
+                return;
+            }
+            
+            let total = 0;
+            let html = `<div class="table-responsive"><table class="table table-hover table-sm"><thead><tr><th>${t('product_name')}</th><th>${t('price')}</th><th>${t('quantity')}</th><th>${t('total')}</th><th></th></tr></thead><tbody>`;
+            
+            cart.forEach(item => {
+                let product = db.products.find(p => p.id === item.productId);
+                if (product) {
+                    let itemTotal = product.price * item.quantity;
+                    total += itemTotal;
+                    html += `<tr><td class="small">${product.name}</td><td>${product.price.toFixed(2)} €</td><td>${item.quantity}</td><td>${itemTotal.toFixed(2)} €</td><td><button class="btn btn-sm btn-outline-danger" onclick="removeFromCart(${product.id})"><i class="bi bi-trash"></i></button></td></tr>`;
+                }
+            });
+            
+            html += `</tbody><tfoot class="table-warning"><tr><td colspan="3" class="text-end"><strong>${t('total')}</strong></td><td class="fw-bold">${total.toFixed(2)} €</td><td></td></tr></tfoot></table></div>`;
+            html += `<div class="d-flex justify-content-between mt-2"><button class="btn btn-outline-custom btn-sm" onclick="navigateTo('home')"><i class="bi bi-arrow-left"></i> ${t('continue')}</button><button class="btn btn-primary-custom btn-sm" onclick="navigateTo('checkout')"><i class="bi bi-check-circle"></i> ${t('finalize')}</button></div>`;
+            
+            container.innerHTML = html;
+        }
+        
+        // ============================================================
+        // CHECKOUT
+        // ============================================================
+        
+        function renderCheckout() {
+            let db = getDB();
+            let cart = getCart();
+            let container = document.getElementById('checkoutSummary');
+            let total = 0;
+            let html = '<ul class="list-group list-group-flush mb-2 small">';
+            
+            cart.forEach(item => {
+                let product = db.products.find(p => p.id === item.productId);
+                if (product) {
+                    let itemTotal = product.price * item.quantity;
+                    total += itemTotal;
+                    html += `<li class="list-group-item d-flex justify-content-between small"><span>${product.name} x${item.quantity}</span><span>${itemTotal.toFixed(2)} €</span></li>`;
+                }
+            });
+            
+            html += `<li class="list-group-item d-flex justify-content-between fw-bold bg-light"><span>${t('total')}</span><span>${total.toFixed(2)} €</span></li></ul>`;
+            html += `<div class="alert bg-success bg-opacity-10 border border-success small py-2"><i class="bi bi-check-circle text-success"></i> <strong>${t('payment_on_delivery')}</strong></div>`;
+            
+            container.innerHTML = html;
+        }
+        
+        function placeOrder(event) {
+            event.preventDefault();
+            let db = getDB();
+            let cart = getCart();
+            if (cart.length === 0) { showNotification(t('empty_cart'), 'warning'); return; }
+            
+            for (let item of cart) {
+                let product = db.products.find(p => p.id === item.productId);
+                if (!product || product.stock < item.quantity) {
+                    showNotification(`${t('stock_insufficient')} ${product ? product.name : ''}`, 'danger');
+                    return;
+                }
+            }
+            
+            let order = {
+                id: db.nextOrderId++,
+                firstName: document.getElementById('firstName').value,
+                lastName: document.getElementById('lastName').value,
+                email: document.getElementById('email').value,
+                phone: document.getElementById('phone').value,
+                address: document.getElementById('address').value,
+                postalCode: document.getElementById('postalCode').value,
+                city: document.getElementById('city').value,
+                items: [...cart],
+                status: 'pending',
+                cancelled: false,
+                date: new Date().toLocaleString(currentLang === 'es' ? 'es-ES' : 'en-US'),
+                total: getCartTotal()
+            };
+            
+            cart.forEach(item => {
+                let product = db.products.find(p => p.id === item.productId);
+                if (product) product.stock -= item.quantity;
+            });
+            
+            db.orders.push(order);
+            saveDB(db);
+            clearCart();
+            navigateTo('confirmation', order);
+        }
+        
+        function renderConfirmation(order) {
+            let container = document.getElementById('confirmationContent');
+            container.innerHTML = `
+                <div class="alert bg-success bg-opacity-10 border border-success mt-2 small">
+                    <h5>${t('order_number')} n°${order.id}</h5>
+                </div>
+                <div class="text-start small">
+                    <p><strong>${t('customer')} :</strong> ${order.firstName} ${order.lastName}</p>
+                    <p><strong>${t('phone')} :</strong> ${order.phone}</p>
+                    <p><strong>${t('address')} :</strong> ${order.address}, ${order.postalCode} ${order.city}</p>
+                    <p><strong>${t('total')} :</strong> <span class="text-gradient fw-bold">${order.total.toFixed(2)} €</span></p>
+                </div>
+                <div class="alert bg-info bg-opacity-10 border border-info mt-2 small py-2">
+                    <i class="bi bi-truck text-info"></i> <strong>${t('delivery_time_info')}</strong>
+                </div>
+            `;
+        }
+        
+        // ============================================================
+        // TRACKING
+        // ============================================================
+        
+        function resetTracking() {
+            document.getElementById('trackingForm').style.display = 'block';
+            document.getElementById('trackingResult').style.display = 'none';
+        }
+        
+        function trackOrder() {
+            let orderId = parseInt(document.getElementById('trackOrderId').value);
+            let email = document.getElementById('trackEmail').value.trim();
+            let db = getDB();
+            let order = db.orders.find(o => o.id === orderId && o.email === email);
+            
+            if (!order) { showNotification(t('order_not_found'), 'danger'); return; }
+            
+            let statusText = order.cancelled ? `❌ ${t('cancelled')}` :
+                order.status === 'pending' ? `⏳ ${t('pending')}` :
+                order.status === 'processing' ? `📦 ${t('processing')}` :
+                order.status === 'shipped' ? `🚚 ${t('shipped')}` :
+                order.status === 'delivered' ? `✅ ${t('delivered')}` : order.status;
+            
+            let html = `<h5 class="mt-3">${t('order_number')} #${order.id}</h5>
+                <div class="alert ${order.cancelled ? 'alert-danger' : 'alert-info'} py-2">${statusText}</div>
+                <p class="small"><strong>${t('date')} :</strong> ${order.date}</p>
+                <p class="small"><strong>Email :</strong> ${order.email}</p>
+                <p class="small"><strong>${t('phone')} :</strong> ${order.phone}</p>
+                <p class="small"><strong>${t('address')} :</strong> ${order.address}</p>
+                <p class="small"><strong>${t('total')} :</strong> ${order.total.toFixed(2)} €</p>`;
+            
+            if (!order.cancelled && (order.status === 'pending' || order.status === 'processing')) {
+                html += `<button class="btn btn-danger btn-sm mt-2" onclick="cancelOrder(${order.id}, '${order.email}')"><i class="bi bi-x-circle"></i> ${t('cancel_order')}</button>`;
+            }
+            
+            html += `<button class="btn btn-outline-custom btn-sm mt-2 ms-1" onclick="navigateTo('tracking')"><i class="bi bi-arrow-left"></i> ${t('return')}</button>`;
+            
+            document.getElementById('trackingForm').style.display = 'none';
+            document.getElementById('trackingResult').style.display = 'block';
+            document.getElementById('trackingResult').innerHTML = html;
+        }
+        
+        function cancelOrder(orderId, email) {
+            if (!confirm(t('order_cancelled') + '?')) return;
+            let db = getDB();
+            let order = db.orders.find(o => o.id === orderId);
+            if (!order || order.email !== email) return;
+            if (order.cancelled) { showNotification(t('already_cancelled'), 'info'); return; }
+            if (order.status === 'shipped' || order.status === 'delivered') {
+                showNotification(t('cannot_cancel'), 'warning'); return;
+            }
+            order.cancelled = true;
+            order.status = 'cancelled';
+            order.items.forEach(item => {
+                let product = db.products.find(p => p.id === item.productId);
+                if (product) product.stock += item.quantity;
+            });
+            saveDB(db);
+            showNotification(t('order_cancelled'), 'success');
+            trackOrder();
+        }
+        
+        // ============================================================
+        // ADMIN
+        // ============================================================
+        
+        function renderAdmin() {
+            if (!isAdminLoggedIn()) {
+                navigateTo('admin-login');
+                return;
+            }
+            
+            let db = getDB();
+            let container = document.getElementById('adminContent');
+            
+            let productRows = db.products.map(p => `
+                <tr>
+                    <td>${p.id}</td>
+                    <td><img src="${p.image}" width="40" height="40" style="object-fit:cover; border-radius:8px;"></td>
+                    <td class="small">${p.name}</td>
+                    <td>${p.price.toFixed(2)} €</td>
+                    <td>${p.stock}</td>
+                    <td>
+                        <button class="btn btn-sm btn-warning" onclick="editProduct(${p.id})"><i class="bi bi-pencil"></i></button>
+                        <button class="btn btn-sm btn-danger" onclick="deleteProduct(${p.id})"><i class="bi bi-trash"></i></button>
+                    </td>
+                </tr>
+            `).join('');
+            
+            let orderRows = db.orders.map(o => `
+                <tr class="${o.cancelled ? 'table-danger' : ''}">
+                    <td>${o.id}</td>
+                    <td class="small">${o.firstName} ${o.lastName}</td>
+                    <td class="small">${o.phone}</td>
+                    <td>${o.total.toFixed(2)} €</td>
+                    <td><span class="badge ${o.cancelled ? 'bg-danger' : 'bg-info'} small">${o.cancelled ? t('cancelled') : t(o.status)}</span></td>
+                    <td>${!o.cancelled ? `<button class="btn btn-sm btn-info" onclick="updateOrderStatus(${o.id})"><i class="bi bi-arrow-repeat"></i></button>` : ''}</td>
+                </tr>
+            `).join('');
+            
+            container.innerHTML = `
+                <button class="btn btn-primary-custom btn-sm mb-2" onclick="openAddProductModal()"><i class="bi bi-plus-circle"></i> ${t('add_product')}</button>
+                <div class="table-responsive"><table class="table table-hover table-sm"><thead><tr><th>ID</th><th>Img</th><th>${t('product_name')}</th><th>${t('price')}</th><th>${t('stock')}</th><th>Acc</th></tr></thead><tbody>${productRows}</tbody></table></div>
+                <hr>
+                <h6>${t('orders')}</h6>
+                <div class="table-responsive"><table class="table table-hover table-sm"><thead><tr><th>ID</th><th>${t('customer')}</th><th>${t('phone')}</th><th>${t('total')}</th><th>${t('status')}</th><th>Acc</th></tr></thead><tbody>${orderRows}</tbody></table></div>
+            `;
+        }
+        
+        function openAddProductModal() {
+            tempProductImage = null;
+            document.getElementById('addProductForm').reset();
+            document.getElementById('imagePreview').style.display = 'none';
+            document.getElementById('placeholderIcon').style.display = 'block';
+            document.getElementById('addProductModal').style.display = 'flex';
+        }
+        
+        function closeAddProductModal() {
+            document.getElementById('addProductModal').style.display = 'none';
+            tempProductImage = null;
+        }
+        
+        function submitProductForm(event) {
+            event.preventDefault();
+            
+            let name = document.getElementById('productName').value.trim();
+            let description = document.getElementById('productDescription').value.trim();
+            let price = parseFloat(document.getElementById('productPrice').value);
+            let stock = parseInt(document.getElementById('productStock').value);
+            
+            if (!name || isNaN(price) || isNaN(stock)) {
+                showNotification('Por favor complete todos los campos obligatorios.', 'warning');
+                return;
+            }
+            
+            let image = tempProductImage || 'https://picsum.photos/400/300';
+            
+            let db = getDB();
+            db.products.push({
+                id: db.nextProductId++,
+                name: name,
+                description: description,
+                price: price,
+                stock: stock,
+                image: image
+            });
+            
+            saveDB(db);
+            closeAddProductModal();
+            showNotification(t('product_added_success'), 'success');
+            navigateTo('admin-dashboard');
+        }
+        
+        function editProduct(productId) {
+            let db = getDB();
+            let p = db.products.find(pr => pr.id === productId);
+            if (!p) return;
+            let name = prompt('Nombre :', p.name); if (!name) return;
+            let price = parseFloat(prompt('Precio :', p.price)); if (isNaN(price)) return;
+            let stock = parseInt(prompt('Stock :', p.stock)); if (isNaN(stock)) return;
+            p.name = name; p.price = price; p.stock = stock;
+            saveDB(db);
+            showNotification(t('updated'), 'success');
+            navigateTo('admin-dashboard');
+        }
+        
+        function deleteProduct(productId) {
+            if (!confirm('¿Eliminar?')) return;
+            let db = getDB();
+            db.products = db.products.filter(p => p.id !== productId);
+            saveDB(db);
+            showNotification(t('deleted'), 'warning');
+            navigateTo('admin-dashboard');
+        }
+        
+        function updateOrderStatus(orderId) {
+            let db = getDB();
+            let order = db.orders.find(o => o.id === orderId);
+            if (!order) return;
+            let statuses = ['pending', 'processing', 'shipped', 'delivered'];
+            let statusNames = [t('pending'), t('processing'), t('shipped'), t('delivered')];
+            let choice = prompt(`0: ${statusNames[0]}\n1: ${statusNames[1]}\n2: ${statusNames[2]}\n3: ${statusNames[3]}\n\nEstado actual: ${t(order.status)}\nSelección (0-3):`);
+            if (choice === null) return;
+            let i = parseInt(choice);
+            if (i >= 0 && i < statuses.length) {
+                order.status = statuses[i];
+                saveDB(db);
+                showNotification(t('status_updated'), 'success');
+                navigateTo('admin-dashboard');
+            }
+        }
+        
+        // ============================================================
+        // NOTIFICATIONS
+        // ============================================================
+        
+        function showNotification(message, type = 'info') {
+            let area = document.getElementById('notificationArea');
+            let alertClass = type === 'success' ? 'alert-success' : type === 'danger' ? 'alert-danger' : type === 'warning' ? 'alert-warning' : 'alert-info';
+            let alert = document.createElement('div');
+            alert.className = `alert ${alertClass} alert-dismissible fade show alert-floating py-2 small`;
+            alert.innerHTML = `${message}<button type="button" class="btn-close btn-close-sm" data-bs-dismiss="alert"></button>`;
+            area.appendChild(alert);
+            setTimeout(() => alert.remove(), 4000);
+        }
+        
+        // ============================================================
+        // INITIALIZATION
+        // ============================================================
+        
+        function init() {
+            getDB();
+            updateCartCount();
+            updatePageLanguage();
+            
+            // Check if admin route was requested
+            if (!checkAdminRoute()) {
+                navigateTo('home');
+            }
+        }
+        
+        init();
+        console.log('🛒 ¡Listo!');
+        console.log('👑 Admin: Añade /admin a la URL o haz clic en "● Admin ●" en el footer');
+        console.log('🔐 Credenciales: usuario: admin, contraseña: admin123');
+        console.log('📸 ¡Agregar producto con importación directa de foto disponible!');
+    </script>
+</body>
+</html>
